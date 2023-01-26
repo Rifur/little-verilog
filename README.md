@@ -23,6 +23,10 @@ $ yosys -p "prep -top baughWooleyArrayMultiplier; write_json output.json" baughW
 $ netlistsvg output.json
 ```
 
+netlistsvg will generate out.svg under this folder looks like this:
+
+![RTL Schematic](https://user-images.githubusercontent.com/1651641/214814563-e6ebe701-98e1-4ab5-a5b6-466576fa9f82.png)
+
 ## To test, use iVerilog to run testbench and generate VCD file,
 
 ```
@@ -30,3 +34,7 @@ $ iverilog -o am testbench_arrayMultiple.v baughWooleyArrayMultiplier.v
 $ ./am
 ```
 and open mytest.vcd with GTKWave
+
+![Testbench Result on GTKWave](https://user-images.githubusercontent.com/1651641/214814673-786b7e3b-9903-4c03-b76a-b688edffe1e9.png)
+
+
