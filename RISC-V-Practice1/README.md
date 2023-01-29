@@ -27,3 +27,7 @@ $ iverilog -o am test_riscv.v riscv.v
 $ ./am
 ```
 and open mytest.vcd with GTKWave
+
+![Testbench Result with GTKWave](https://user-images.githubusercontent.com/1651641/215306059-326b107f-1535-4a6e-aea6-4903d7fcaa11.png)
+
+Notice: opcode=0x6F is `JAL` jump-and-link instruction.
