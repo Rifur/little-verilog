@@ -12,7 +12,7 @@
 `define _ORI  3'h6
 `define _ANDI 3'h7
 
-`define _JAR 7'b1101111
+`define _JAL 7'b1101111
 
 module sram(dout, din, rd_addr, wr_addr, wr_en, clk);
     parameter WIDTH = 32;
@@ -54,7 +54,7 @@ module sram(dout, din, rd_addr, wr_addr, wr_en, clk);
         //x2 = x1 + x2; add x2, x1, x2;
         mem[5] = {7'b000_0000, 5'd2, 5'd1, `_ADD, 5'd2, 7'b0110011};
         //jump mem[4]
-        mem[6] = {1'b1, 10'b11_1111_1110, 1'b1, 8'b1111_1111, 5'd0, `_JAR};
+        mem[6] = {1'b1, 10'b11_1111_1110, 1'b1, 8'b1111_1111, 5'd0, `_JAL};
 
     end
 
@@ -99,7 +99,7 @@ module riscv(clk, rst_n, pc, instruction , regRd);
         if(!rst_n)
             pc <= 0;
         else begin
-            if(opcode == `_JAR)
+            if(opcode == `_JAL)
                 pc <= pc + {{11{immJ[19]}}, immJ[19:0], 1'b0}; //sign-extend and *2
             else
                 //pc <= pc + (opcode == `_JAR ?  {{11{immJ[19]}}, immJ[19:0], 1'b0} : 0);
@@ -143,7 +143,7 @@ module riscv(clk, rst_n, pc, instruction , regRd);
                     regfile[rd] <= regfile[rs1] | immI;
             endcase
         end
-        else if(opcode == `_JAR) begin
+        else if(opcode == `_JAL) begin
             regfile[rd] <= pc + 4;
         end
         else begin
