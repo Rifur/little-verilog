@@ -38,3 +38,8 @@ and open mytest.vcd with GTKWave
 ![Testbench Result on GTKWave](https://user-images.githubusercontent.com/1651641/214814673-786b7e3b-9903-4c03-b76a-b688edffe1e9.png)
 
 
+## Conway's Game of Life
+```
+$ iverilog -o am Conwaylife.v test_Conwaylife.v
+$ ./am
+```
