@@ -40,6 +40,6 @@ and open mytest.vcd with GTKWave
 
 ## Conway's Game of Life
 ```
-$ iverilog -o am Conwaylife.v test_Conwaylife.v
+$ iverilog -o am test_Conwaylife.v Conwaylife.v
 $ ./am
 ```
