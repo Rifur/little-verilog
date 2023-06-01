@@ -30,7 +30,7 @@ netlistsvg will generate out.svg under this folder looks like this:
 ## To test, use iVerilog to run testbench and generate VCD file,
 
 ```
-$ iverilog -o am testbench_arrayMultiple.v baughWooleyArrayMultiplier.v
+$ iverilog -Wimplicit -o am testbench_arrayMultiple.v baughWooleyArrayMultiplier.v
 $ ./am
 ```
 and open mytest.vcd with GTKWave
@@ -40,6 +40,6 @@ and open mytest.vcd with GTKWave
 
 ## Conway's Game of Life
 ```
-$ iverilog -o am test_Conwaylife.v Conwaylife.v
+$ iverilog -Wimplicit -o am test_Conwaylife.v Conwaylife.v
 $ ./am
 ```
