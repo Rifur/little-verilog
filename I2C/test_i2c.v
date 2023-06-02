@@ -1,11 +1,10 @@
 `timescale 1ns / 1ps
-//iverilog -Wimplicit -o am test_i2c.v I2c.v
+//iverilog -Wimplicit -o am test_i2c.v I2C_slave.v IOBUF.v
 module test_i2c;
     reg clk, rstn, SCL_i;
     wire SDA;
     reg SDA_i;
     wire SDA_in_en, SDA_o;
-    wire tb_ack_o;
     I2C_slave u1(clk, rstn, SCL_i, SDA_i, SDA_in_en, SDA_o);
     integer i;
     wire [6:0] address;

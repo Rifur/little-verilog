@@ -44,7 +44,7 @@ module I2C_slave
         output SDA_o
     );
 
-    parameter I2C_ADDRESS = 7'h53;
+    parameter I2C_ADDRESS = 7'h03;
     parameter IDLE = 0;
     parameter ADDR = 1;
     parameter RACK = 2;
@@ -127,7 +127,7 @@ module I2C_slave
             end
             RACK: ns = SCL_negedge ? READ : RACK;
             WACK: ns = SCL_negedge ? WRITE : WACK;
-            READ: ns = stop_cond ? IDLE : ((addr_cnt==8'd8 & SCL_negedge) ? RMACK : READ);
+            READ:  ns = stop_cond ? IDLE : ((addr_cnt==8'd8) ? RMACK : READ);
             WRITE: ns = stop_cond ? IDLE : ((addr_cnt==8'd8) ? WACK : WRITE);
             RMACK: ns = SCL_negedge ? (r_master_ack ? IDLE : READ) : RMACK;
             NOTME: ns = SCL_negedge ? IDLE : NOTME;
@@ -136,7 +136,6 @@ module I2C_slave
 
     assign SDA_in_en = state==IDLE | state==ADDR | state==NOTME | state==WRITE | state==RMACK;
     assign SDA_o = ~((state==READ & data[0]) | (state==RACK) | (state==WACK));
-    wire tb_ack_o = (state==NOTME);
 endmodule
 
 
@@ -158,7 +157,6 @@ module posedge_detector
             posedge_o <= {prev, curr} == 2'b01;
         end
     end
-
 endmodule
 
 module negedge_detector
@@ -176,9 +174,7 @@ module negedge_detector
         end
         else begin
             prev <= curr;
-            negedge_o <= ({prev,curr} == 2'b10);
-
+            negedge_o <= {prev,curr} == 2'b10;
         end
     end
-
 endmodule
