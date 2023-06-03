@@ -40,7 +40,6 @@ void append_as_array(int rho, int *addr, int *append_o, int *done_o) {
 
 void append_as_linkedlist(int rho, int *addr, int *append_o, int *done_o) {
     int param_addr = 0;
-    int flag = 1;
     
     while(u1[param_addr].next != 0) {
         param_addr = u1[param_addr].next;
@@ -62,6 +61,22 @@ void append_as_linkedlist(int rho, int *addr, int *append_o, int *done_o) {
     }
 }
 
+void search(int rho, int *addr, int *found_o, int *done_o) {
+    int param_addr = 0;
+    while(u1[param_addr].next != 0) {
+        param_addr = u1[param_addr].next;
+        if(u1[param_addr].rho == rho) {
+            *done_o = 1;
+            *found_o = 1;
+            *addr = param_addr;
+            return;
+        }
+    }
+    *done_o = 0;
+    *found_o = 0;
+    *addr = param_addr;
+}
+
 void append(int rho, int *addr, int *append_o, int *done_o) {
     //append_as_array(rho, addr, append_o, done_o);
     append_as_linkedlist(rho, addr, append_o, done_o);
@@ -72,11 +87,24 @@ int main(void) {
     int addr = 0;
     int append_o = 0;
     int done_o = 0;
+    int found_o = 0;
 
     append(123, &addr, &append_o, &done_o);
     printf("addr:%d append_o:%d done_o:%d {rho:%d, vote:%d, next:%d}\n", addr, append_o, done_o, u1[addr].rho, u1[addr].vote, u1[addr].next);
+    
+    for(addr=0; addr<SIZE; ++addr) {
+        printf("u1[%d]={rho:%d, vote:%d, next:%d}\n", addr, u1[addr].rho, u1[addr].vote, u1[addr].next);
+    }
+    
     append(123, &addr, &append_o, &done_o);
     printf("addr:%d append_o:%d done_o:%d {rho:%d, vote:%d, next:%d}\n", addr, append_o, done_o, u1[addr].rho, u1[addr].vote, u1[addr].next);
+    
+    for(addr=0; addr<SIZE; ++addr) {
+        printf("u1[%d]={rho:%d, vote:%d, next:%d}\n", addr, u1[addr].rho, u1[addr].vote, u1[addr].next);
+    }
+
+    return 0;
+    
     append(321, &addr, &append_o, &done_o);
     printf("addr:%d append_o:%d done_o:%d {rho:%d, vote:%d, next:%d}\n", addr, append_o, done_o, u1[addr].rho, u1[addr].vote, u1[addr].next);
     append(123, &addr, &append_o, &done_o);
@@ -101,5 +129,13 @@ int main(void) {
     for(addr=0; addr<SIZE; ++addr) {
         printf("u1[%d]={rho:%d, vote:%d, next:%d}\n", addr, u1[addr].rho, u1[addr].vote, u1[addr].next);
     }
+
+    search(789, &addr, &found_o, &done_o);
+    printf("found:%d, u1[%d]={rho:%d, vote:%d, next:%d}\n", found_o, addr, u1[addr].rho, u1[addr].vote, u1[addr].next);
+    search(321, &addr, &found_o, &done_o);
+    printf("found:%d, u1[%d]={rho:%d, vote:%d, next:%d}\n", found_o, addr, u1[addr].rho, u1[addr].vote, u1[addr].next);
+    search(123, &addr, &found_o, &done_o);
+    printf("found:%d, u1[%d]={rho:%d, vote:%d, next:%d}\n", found_o, addr, u1[addr].rho, u1[addr].vote, u1[addr].next);
+
     return 0;
 }

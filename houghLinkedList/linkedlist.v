@@ -6,21 +6,21 @@ module HTLinkList
         input [9:0] rho_i,
         input append_i, search_i,
         output reg done_o, append_o, found_o,
-        output wire [31:0] node_o
+        output wire [31:0] node_o,
+        input show_i,
+        input [11:0] param_addr_i
     );
 
+    reg [9:0] rho;
     reg [3:0] state, ns;
-    reg [11:0] capacity;
+    reg [11:0] nextIndex;
+    wire [11:0] nextIndex_plus_one = nextIndex + 12'b1;
     reg param_we;
     reg [11:0] param_addr;
     reg [31:0] param_data;
-    reg capacity_plus_one;
-    wire [9:0] node_rho;
-    wire [9:0] node_vote;
-    wire [11:0] node_next;
-    assign node_rho = node_o[31:22];
-    assign node_vote = node_o[21:12];
-    assign node_next = node_o[11:0];
+    wire [9:0] node_rho = node_o[31:22];
+    wire [9:0] node_vote = node_o[21:12];
+    wire [11:0] node_next = node_o[11:0];
 
     linkedlist u1(
                    .clk(clk),
@@ -35,22 +35,29 @@ module HTLinkList
                    .node_o(node_o)
                );
 
-    parameter FULL=4094;
+    parameter SIZE=4094;
     parameter IDLE=0;
     parameter SEARCH=1;
     parameter APPEND=2;
-    parameter APPEND_DONE=3;
+    parameter APPEND_WAIT_SRAM=8;
+    parameter SEARCH_WAIT_SRAM=9;
+    parameter APPEND_FIND=3;
+    parameter APPEND_NEW=4;
+    parameter APPEND_DONE=5;
+    parameter SEARCH_FIND=6;
+    parameter SHOW=7;
+    parameter SHOW_WAIT_SRAM=10;
 
     always@(posedge clk) begin
         if(~rstn) begin
             state <= IDLE;
             param_we <= 0;
-            param_addr <= 1; //remainder [0] as NULL
+            param_addr <= 0;
             param_data <= 0;
             found_o <= 0;
             append_o <= 0;
             done_o <= 0;
-            capacity <= 12'b0;
+            nextIndex <= 12'b0;
         end
         else begin
             case(state)
@@ -59,65 +66,93 @@ module HTLinkList
                     append_o <= 0;
                     done_o <= 0;
                     param_we <= 0;
-                    param_addr <= 1;
+                    param_addr <= 0;
+                    rho <= rho_i;
                     if(search_i)
                         state <= SEARCH;
                     else if(append_i)
                         state <= APPEND;
+                    else if(show_i) begin
+                        state <= SHOW_WAIT_SRAM;
+                        param_addr <= param_addr_i;
+                    end
                     else
                         state <= IDLE;
                 end
                 SEARCH: begin
-                    if(node_rho != rho_i) begin
-                        if(node_next == 0) begin
-                            state <= IDLE;
-                            done_o <= 1'b1;
-                            found_o <= 1'b0;
-                        end
-                        else begin
-                            state <= SEARCH;
-                            param_addr <= node_next;
-                        end
+                    if(node_next != 0) begin
+                        param_addr <= node_next;
+                        state <= SEARCH_WAIT_SRAM;
                     end
                     else begin
                         state <= IDLE;
-                        done_o <= 1'b1;
-                        found_o <= 1'b1;
+                        done_o <= 1;
+                        found_o <= 0;
+                    end
+                end
+                SEARCH_WAIT_SRAM : begin
+                    state <= SEARCH_FIND;
+                end
+                SEARCH_FIND: begin
+                    if(node_rho == rho) begin
+                        state <= IDLE;
+                        done_o <= 1;
+                        found_o <= 1;
+                    end
+                    else begin
+                        state <= SEARCH;
                     end
                 end
                 APPEND: begin
-                    if(node_rho != rho_i) begin
-                        if(node_next == 0) begin
-                            if(capacity < FULL) begin
-                                state <= APPEND_DONE;
-                                param_we <= 1'b1;
-                                capacity <= capacity + 12'b1;
-                                param_addr <= capacity + 12'b1;
-                                //param_data <= {rho_i, 10'd1, {12{1'b0}}};
-                                param_data <= {rho_i, 10'd1, capacity+12'd2};
-                            end
-                            else begin
-                                state <= IDLE;
-                                done_o <= 1'b1;
-                            end
+                    if(node_next != 0) begin
+                        param_addr <= node_next;
+                        state <= APPEND_WAIT_SRAM;
+                    end
+                    else begin
+                        if(node_next+1 < SIZE) begin
+                            param_we <= 1'b1;
+                            param_data <= {node_rho, node_vote, nextIndex_plus_one};
+                            state <= APPEND_NEW;
                         end
                         else begin
-                            state <= APPEND;
-                            param_addr <= node_next;
+                            state <= IDLE;
+                            done_o <= 1;
+                            append_o <= 0;
                         end
+                    end
+                end
+                APPEND_WAIT_SRAM : begin
+                    state <= APPEND_FIND;
+                end
+                APPEND_FIND: begin
+                    if(node_rho==rho) begin
+                        param_we <= 1'b1;
+                        param_data <= {node_rho, node_vote+10'b1, nextIndex};
+                        state <= APPEND_DONE;
                     end
                     else begin
                         state <= APPEND_DONE;
-                        param_we <= 1'b1;
-                        param_data <= {node_rho, node_vote+10'd1, node_next};
-                        //param_data <= 32'h12345678;
                     end
+                end
+                APPEND_NEW: begin
+                    param_we <= 1'b1;
+                    param_addr <= nextIndex_plus_one;
+                    param_data <= {rho, 10'b1, 12'b0};
+                    nextIndex <= nextIndex_plus_one;
+                    state <= APPEND_DONE;
                 end
                 APPEND_DONE: begin
                     state <= IDLE;
                     param_we <= 0;
                     done_o <= 1;
                     append_o <= 1;
+                end
+                SHOW_WAIT_SRAM: begin
+                    state <= SHOW;
+                end
+                SHOW: begin
+                    state <= IDLE;
+                    done_o <= 1;
                 end
             endcase
         end
