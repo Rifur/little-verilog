@@ -1,6 +1,6 @@
 # little-verilog
 
-Running Verilog HDL on Mac, using [Yosys](https://github.com/YosysHQ/yosys) + [netlistsvg](https://github.com/nturley/netlistsvg) to generate RTL schematic, and using [Icarus Verilog](https://github.com/steveicarus/iverilog) to run testbenches, and and using [GTKWave](https://gtkwave.sourceforge.net) to view the vcd file.
+This project is running Verilog HDL on Mac, using [Yosys](https://github.com/YosysHQ/yosys) + [netlistsvg](https://github.com/nturley/netlistsvg) to generate RTL schematics, [Icarus Verilog](https://github.com/steveicarus/iverilog) to run testbenches, and [GTKWave](https://gtkwave.sourceforge.net) to view the VCD file
 
 ## Install
 
