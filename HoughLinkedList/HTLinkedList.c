@@ -43,9 +43,6 @@ void append_as_linkedlist(int rho, int *addr, int *append_o, int *done_o) {
     
     while(u1[param_addr].next != 0) {
         param_addr = u1[param_addr].next;
-        //Note: This 'if' statement also needs to satisfy the condition of the 'while' statement 
-        // because the two statements are split into separate states in Verilog HDL practice.
-        // => (u1[param_addr_old].next != 0) && (u1[param_addr_curr].rho == rho)
         if(u1[param_addr].rho == rho) {
             u1[param_addr].vote += 1;
             *append_o = 1;
