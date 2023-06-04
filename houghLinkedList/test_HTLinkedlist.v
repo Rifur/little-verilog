@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-//iverilog -Wimplicit -o am test_HTLinkedlist.v linkedlist.v
+//iverilog -Wimplicit -o am test_HTLinkedlist.v HTLinkedList.v linkedlist.v sram.v
 module test_linkedlist;
     reg clk, rstn;
     reg [9:0] rho_i;
@@ -8,20 +8,20 @@ module test_linkedlist;
     wire [31:0] node_o;
     reg [11:0] param_addr_i;
     integer SIZE=10;
-    HTLinkList u1(
-                   .clk(clk),
-                   .rstn(rstn),
-                   .rho_i(rho_i),
-                   .append_i(append_i),
-                   .search_i(search_i),
-                   .done_o(done_o),
-                   .append_o(append_o),
-                   .found_o(found_o),
-                   .node_o(node_o),
+    HTLinkedList u1(
+                     .clk(clk),
+                     .rstn(rstn),
+                     .rho_i(rho_i),
+                     .append_i(append_i),
+                     .search_i(search_i),
+                     .done_o(done_o),
+                     .append_o(append_o),
+                     .found_o(found_o),
+                     .node_o(node_o),
 
-                   .show_i(show_i),
-                   .param_addr_i(param_addr_i)
-               );
+                     .show_i(show_i),
+                     .param_addr_i(param_addr_i)
+                 );
 
     integer i, k;
     initial begin
