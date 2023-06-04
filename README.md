@@ -13,7 +13,7 @@ $ brew install gtkwave
 
 --------
 
-## To generate RTL schematic of Baugh-Wooley Signed Array Muliplier, 
+## To generate the RTL schematic of the Baugh-Wooley Signed Array Multiplier, use Yosys + netlistsvg.
 
 `$ cd BaughWooleyArrayMultiplier`
 
@@ -27,7 +27,7 @@ netlistsvg will generate out.svg under this folder looks like this:
 
 ![RTL Schematic](https://user-images.githubusercontent.com/1651641/214814563-e6ebe701-98e1-4ab5-a5b6-466576fa9f82.png)
 
-## To test, use iVerilog to run testbench and generate VCD file,
+## To test, use Icarus Verilog to run the testbench and generate the VCD file.
 
 ```
 $ iverilog -Wimplicit -o am testbench_arrayMultiple.v baughWooleyArrayMultiplier.v
