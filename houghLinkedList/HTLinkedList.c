@@ -43,6 +43,9 @@ void append_as_linkedlist(int rho, int *addr, int *append_o, int *done_o) {
     
     while(u1[param_addr].next != 0) {
         param_addr = u1[param_addr].next;
+        //Note: This 'if' statement also needs to satisfy the condition of the 'while' statement 
+        // because the two statements are split into separate states in Verilog HDL practice.
+        // => (u1[param_addr_old].next != 0) && (u1[param_addr_curr].rho == rho)
         if(u1[param_addr].rho == rho) {
             u1[param_addr].vote += 1;
             *append_o = 1;
@@ -91,22 +94,17 @@ int main(void) {
 
     append(123, &addr, &append_o, &done_o);
     printf("addr:%d append_o:%d done_o:%d {rho:%d, vote:%d, next:%d}\n", addr, append_o, done_o, u1[addr].rho, u1[addr].vote, u1[addr].next);
-    
-    for(addr=0; addr<SIZE; ++addr) {
-        printf("u1[%d]={rho:%d, vote:%d, next:%d}\n", addr, u1[addr].rho, u1[addr].vote, u1[addr].next);
-    }
-    
     append(123, &addr, &append_o, &done_o);
     printf("addr:%d append_o:%d done_o:%d {rho:%d, vote:%d, next:%d}\n", addr, append_o, done_o, u1[addr].rho, u1[addr].vote, u1[addr].next);
     
-    for(addr=0; addr<SIZE; ++addr) {
-        printf("u1[%d]={rho:%d, vote:%d, next:%d}\n", addr, u1[addr].rho, u1[addr].vote, u1[addr].next);
-    }
+    //for(addr=0; addr<SIZE; ++addr) {
+    //    printf("u1[%d]={rho:%d, vote:%d, next:%d}\n", addr, u1[addr].rho, u1[addr].vote, u1[addr].next);
+    //}
 
-    return 0;
-    
     append(321, &addr, &append_o, &done_o);
     printf("addr:%d append_o:%d done_o:%d {rho:%d, vote:%d, next:%d}\n", addr, append_o, done_o, u1[addr].rho, u1[addr].vote, u1[addr].next);
+    
+
     append(123, &addr, &append_o, &done_o);
     printf("addr:%d append_o:%d done_o:%d {rho:%d, vote:%d, next:%d}\n", addr, append_o, done_o, u1[addr].rho, u1[addr].vote, u1[addr].next);
     append(321, &addr, &append_o, &done_o);
@@ -114,14 +112,14 @@ int main(void) {
     for(int i=0; i<SIZE+3; ++i) {
         append(i, &addr, &append_o, &done_o);
         if(!append_o) {
-            printf("index %d > 4095\n", i);
+            printf("append %d failed, full %d+1 >= %d\n", i, nextIndex, SIZE);
         }
     }
     printf("---\n");
     for(int i=SIZE+3; i>=0; --i) {
         append(i, &addr, &append_o, &done_o);
         if(!append_o) {
-            printf("index %d > 4095\n", i);
+            printf("append %d failed, full %d+1 >= %d\n", i, nextIndex, SIZE);
         }
     }
 

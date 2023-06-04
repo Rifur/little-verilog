@@ -7,7 +7,7 @@ module test_linkedlist;
     wire done_o, append_o, found_o;
     wire [31:0] node_o;
     reg [11:0] param_addr_i;
-
+    integer SIZE=10;
     HTLinkList u1(
                    .clk(clk),
                    .rstn(rstn),
@@ -23,7 +23,7 @@ module test_linkedlist;
                    .param_addr_i(param_addr_i)
                );
 
-    integer i;
+    integer i, k;
     initial begin
         $dumpfile("mytest.vcd");
         $dumpvars;
@@ -39,28 +39,37 @@ module test_linkedlist;
 
         Append(10'd123);
         Append(10'd123);
-        //ShowTask();
-
-        Append(10'd123);
-        //ShowTask();
-
         Append(10'd321);
-        //ShowTask();
+        Append(10'd123);
+        Append(10'd321);
 
-        Search(10'd123);
+        for(k=0; k<=SIZE+3; k=k+1) begin
+            Append(k);
+        end
+
+        for(k=SIZE+3; k>=0; k=k-1) begin
+            Append(k);
+        end
+
         Search(10'd789);
         Search(10'd321);
+        Search(10'd123);
 
         ShowTask();
 
         $finish;
     end
 
+    initial begin
+        #500;
+        //$finish;
+    end
+
     integer j;
     task ShowTask;
         begin
             #10;
-            for(i=0; i<5; i=i+1) begin
+            for(i=0; i<SIZE; i=i+1) begin
                 show_i <= 1;
                 param_addr_i <= i;
                 #2;
@@ -82,12 +91,11 @@ module test_linkedlist;
             rho_i <= data;
             #2;
             append_i <= 1'b0;
-            while (~(done_o) && i < 10) begin
+            while (~(done_o)) begin
                 #2;
                 i += 1;
             end
             rho_i <= 10'd0;
-            #2;
         end
     endtask
 
@@ -98,7 +106,7 @@ module test_linkedlist;
             rho_i <= data;
             #2;
             search_i <= 1'b0;
-            while (~(done_o) && i < 10) begin
+            while (~(done_o)) begin
                 #2;
                 i += 1;
             end

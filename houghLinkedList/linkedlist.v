@@ -12,7 +12,7 @@ module HTLinkList
     );
 
     reg [9:0] rho;
-    reg [3:0] state, ns;
+    reg [3:0] state, waitsram_state;
     reg [11:0] nextIndex;
     wire [11:0] nextIndex_plus_one = nextIndex + 12'b1;
     reg param_we;
@@ -35,18 +35,17 @@ module HTLinkList
                    .node_o(node_o)
                );
 
-    parameter SIZE=4094;
+    //parameter SIZE=4094;
+    parameter SIZE=10;
     parameter IDLE=0;
     parameter SEARCH=1;
     parameter APPEND=2;
-    parameter APPEND_WAIT_SRAM=8;
-    parameter SEARCH_WAIT_SRAM=9;
     parameter APPEND_FIND=3;
     parameter APPEND_NEW=4;
     parameter APPEND_DONE=5;
     parameter SEARCH_FIND=6;
     parameter SHOW=7;
-    parameter SHOW_WAIT_SRAM=10;
+    parameter WAIT_SRAM=10;
 
     always@(posedge clk) begin
         if(~rstn) begin
@@ -58,6 +57,7 @@ module HTLinkList
             append_o <= 0;
             done_o <= 0;
             nextIndex <= 12'b0;
+            waitsram_state <= IDLE;
         end
         else begin
             case(state)
@@ -67,13 +67,19 @@ module HTLinkList
                     done_o <= 0;
                     param_we <= 0;
                     param_addr <= 0;
+                    waitsram_state <= 0;
                     rho <= rho_i;
-                    if(search_i)
-                        state <= SEARCH;
-                    else if(append_i)
-                        state <= APPEND;
+                    if(search_i) begin
+                        state <= WAIT_SRAM;
+                        waitsram_state <= SEARCH;
+                    end
+                    else if(append_i) begin
+                        state <= WAIT_SRAM;
+                        waitsram_state <= APPEND;
+                    end
                     else if(show_i) begin
-                        state <= SHOW_WAIT_SRAM;
+                        state <= WAIT_SRAM;
+                        waitsram_state <= SHOW;
                         param_addr <= param_addr_i;
                     end
                     else
@@ -82,16 +88,14 @@ module HTLinkList
                 SEARCH: begin
                     if(node_next != 0) begin
                         param_addr <= node_next;
-                        state <= SEARCH_WAIT_SRAM;
+                        state <= WAIT_SRAM;
+                        waitsram_state <= SEARCH_FIND;
                     end
                     else begin
                         state <= IDLE;
                         done_o <= 1;
                         found_o <= 0;
                     end
-                end
-                SEARCH_WAIT_SRAM : begin
-                    state <= SEARCH_FIND;
                 end
                 SEARCH_FIND: begin
                     if(node_rho == rho) begin
@@ -106,10 +110,11 @@ module HTLinkList
                 APPEND: begin
                     if(node_next != 0) begin
                         param_addr <= node_next;
-                        state <= APPEND_WAIT_SRAM;
+                        state <= WAIT_SRAM;
+                        waitsram_state <= APPEND_FIND;
                     end
                     else begin
-                        if(node_next+1 < SIZE) begin
+                        if(nextIndex+1 < SIZE) begin
                             param_we <= 1'b1;
                             param_data <= {node_rho, node_vote, nextIndex_plus_one};
                             state <= APPEND_NEW;
@@ -121,17 +126,14 @@ module HTLinkList
                         end
                     end
                 end
-                APPEND_WAIT_SRAM : begin
-                    state <= APPEND_FIND;
-                end
                 APPEND_FIND: begin
                     if(node_rho==rho) begin
                         param_we <= 1'b1;
-                        param_data <= {node_rho, node_vote+10'b1, nextIndex};
+                        param_data <= {node_rho, node_vote+10'b1, node_next};
                         state <= APPEND_DONE;
                     end
                     else begin
-                        state <= APPEND_DONE;
+                        state <= APPEND;
                     end
                 end
                 APPEND_NEW: begin
@@ -147,8 +149,8 @@ module HTLinkList
                     done_o <= 1;
                     append_o <= 1;
                 end
-                SHOW_WAIT_SRAM: begin
-                    state <= SHOW;
+                WAIT_SRAM: begin
+                    state <= waitsram_state;
                 end
                 SHOW: begin
                     state <= IDLE;
